@@ -1,18 +1,41 @@
 pipeline{
   agent any;
+  tools {
+    
+  }
   parameters{
     booleanParam description:
   }
   stages {
-    stage ('Compilo'){
+    stage('Compilo') {
+      echo 'Pedir a maven que compile'
+      sh 'mvn compile'
     }
-    stage ('Subo artefacto'){
+    stage('Pruebo') {
+      steps {
+        echo 'Pedir a maven que testee'
+      }
+      post {
+      always {
+        junit allowEmptyResults: true, testResults: 'target/*reports.xml'
+      }
     }
+    stage('Empaquetar') {
+      steps {
+      echo 'Pedir a maven que empaquete'
+      sh 'mvn package'
+      }
+      post{
+        always {
+          echo 'Guardo el WAR'
+          archiveArtifacts artifacts: '', followSymlinks: false
+        }
+      }
+     }
   }
-  post{
-    always{
+  post {
+    always {
       echo 'impia procesos y logs'
     }
-  
   }
 }
